@@ -4,7 +4,8 @@ var network = require('network');
 
 var channels = ['1','6','11'];
 var i = 0;
-var channelHopper;// = spawn('airport', ['sniff', channels[i]]);
+var channelHopper;
+var outputFile = 'packets.log';
 
 var hop = function(){
   if (channelHopper) {
@@ -29,21 +30,23 @@ var hop = function(){
     console.log('airport stderr: ' + data);
   });
 
-  //channelHopper.on('close', function (code) {
-    //if (code !== 0) {
-      //console.log('airport process exited with code ' + code);
-    //}
-  //});
-
-  setTimeout(hop, 5000);
+  setTimeout(hop, 10000);
 };
 
 var sniff = function(interfaceName) {
+  console.log(" _____       _  __  __ _                     ");
+  console.log("/  ___|     (_)/ _|/ _(_)                    ");
+  console.log("\\ `--. _ __  _| |_| |_ _ _ __   __ _        ");
+  console.log(" `--. \\ '_ \\| |  _|  _| | '_ \\ / _` |     ");
+  console.log("/\\__/ / | | | | | | | | | | | | (_| |_ _ _  ");
+  console.log("\\____/|_| |_|_|_| |_| |_|_| |_|\\__, (_|_|_)");
+  console.log("                                __/ |        ");
+  console.log("                               |___/         ");
 
-  var child = spawn('./tinsSniffer', [interfaceName]);
+  var child = spawn(require('path').join(__dirname, 'tinsSniffer'), [interfaceName]);
 
   child.stdout.on('data', function (data) {
-    fs.appendFile('./packets.log', data, function (err) {
+    fs.appendFile(outputFile, data, function (err) {
       if (err) {
         console.log(err);
       }
@@ -51,13 +54,15 @@ var sniff = function(interfaceName) {
   });
 
   child.stderr.on('data', function (err) {
-    fs.appendFile('./error.log', err.toString());
+    console.log(err.toString());
+    fs.appendFile('error.log', err.toString());
   });
 
 }
 
-//sniff();
-//hop();
+if (process.argv[2]) {
+  outputFile = process.argv[2];
+}
 
 network.get_active_interface(function(err, obj) {
   var interfaceName = 'en0';
