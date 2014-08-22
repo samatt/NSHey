@@ -11,5 +11,9 @@
   },
   "bin": "./sniffer.js",
   "author": "Surya Mattu and Sam Lavigne",
-  "license": "GPL"
+  "license": "GPL",
+  "repository" :{
+    "type" : "git",
+    "url" : "http://github.com/antiboredom/sniffer.git"
+  }
 }
