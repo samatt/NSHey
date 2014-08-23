@@ -4,12 +4,44 @@ var spawn = require('child_process').spawn;
 var fs = require('fs');
 var network = require('network');
 
-var channels = ['1','6','11'];
 var channelIndex = 0;
-var channelHopper;
-var outputFile = 'packets.log';
+var channelHopper, outputFile, channels;
 
-var hop = function(){
+var opts = require("nomnom").option('channels', {
+  abbr: 'c',
+  default: '1,6,11',
+  help: 'Channels to search through (separate by commas)'
+}).option('output', {
+  abbr: 'o',
+  default: 'packets.log',
+  help: 'Output file'
+}).option('interface', {
+  abbr: 'i',
+  help: 'Interface (leave blank to autodetect)'
+}).parse();
+
+outputFile = opts.output;
+channels = opts.channels.split(',');
+
+network.get_active_interface(function(err, obj) {
+  var interfaceName;
+
+  if (opts.interface) {
+    interfaceName = opts.interface;
+  } else {
+    if (obj) {
+      interfaceName = obj.name;
+    } else {
+      interfaceName = 'en0';
+    }
+  }
+
+  sniff(interfaceName);
+  hop();
+});
+
+
+var hop = function() {
   if (channelHopper) {
     channelHopper.kill();
   }
@@ -19,8 +51,6 @@ var hop = function(){
   } else{
     channelIndex = 0;
   }
-
-  //console.log('switching to  channel ' + channels[i]);
 
   channelHopper = spawn('/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport', ['sniff', channels[channelIndex]]);
 
@@ -74,17 +104,4 @@ var sniff = function(interfaceName) {
 
 }
 
-if (process.argv[2]) {
-  outputFile = process.argv[2];
-}
 
-network.get_active_interface(function(err, obj) {
-  var interfaceName = 'en0';
-
-  if (obj) {
-    interfaceName = obj.name;
-  }
-
-  sniff(interfaceName);
-  hop();
-});
