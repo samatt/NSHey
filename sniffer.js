@@ -1,47 +1,12 @@
-#!/usr/bin/env node
-
 var spawn = require('child_process').spawn;
 var fs = require('fs');
 var network = require('network');
 
 var channelIndex = 0;
-var channelHopper, outputFile, channels;
+var channelHopper;
+var currentChannel;
 
-var opts = require("nomnom").option('channels', {
-  abbr: 'c',
-  default: '1,6,11',
-  help: 'Channels to search through (separate by commas)'
-}).option('output', {
-  abbr: 'o',
-  default: 'packets.log',
-  help: 'Output file'
-}).option('interface', {
-  abbr: 'i',
-  help: 'Interface (leave blank to autodetect)'
-}).parse();
-
-outputFile = opts.output;
-channels = opts.channels.split(',');
-
-network.get_active_interface(function(err, obj) {
-  var interfaceName;
-
-  if (opts.interface) {
-    interfaceName = opts.interface;
-  } else {
-    if (obj) {
-      interfaceName = obj.name;
-    } else {
-      interfaceName = 'en0';
-    }
-  }
-
-  sniff(interfaceName);
-  hop();
-});
-
-
-var hop = function() {
+var hop = function(channels) {
   if (channelHopper) {
     channelHopper.kill();
   }
@@ -52,7 +17,9 @@ var hop = function() {
     channelIndex = 0;
   }
 
-  channelHopper = spawn('/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport', ['sniff', channels[channelIndex]]);
+  currentChannel = channels[channelIndex];
+
+  channelHopper = spawn('/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport', ['sniff', currentChannel]);
 
   channelHopper.stdout.on('data', function (data) {
     console.log('airport stdout: ' + data);
@@ -62,10 +29,10 @@ var hop = function() {
     console.log('airport stderr: ' + data);
   });
 
-  setTimeout(hop, 10000);
+  setTimeout(hop, 10000, channels);
 };
 
-var sniff = function(interfaceName) {
+var sniff = function(interfaceName, outputFile) {
   console.log(
     "\n" +
     "███╗   ██╗███████╗██╗  ██╗███████╗██╗   ██╗██╗   ██╗██╗   ██╗" + "\n" +
@@ -84,7 +51,7 @@ var sniff = function(interfaceName) {
     process.stdout.cursorTo(0);
     i = (i + 1) % 4;
     var dots = new Array(i + 1).join(".");
-    process.stdout.write("Sniffing on channel " + channels[channelIndex] + dots);
+    process.stdout.write("Sniffing on channel " + currentChannel + dots);
   }, 300);
 
   var child = spawn(require('path').join(__dirname, 'tinsSniffer'), [interfaceName]);
@@ -101,7 +68,15 @@ var sniff = function(interfaceName) {
     console.log(err.toString());
     fs.appendFile('error.log', err.toString());
   });
-
 }
 
+var getInterface = function(cb) {
+  network.get_active_interface(function(err, obj) {
+    cb(obj);
+  });
+}
+
+module.exports.sniff = sniff;
+module.exports.hop = hop;
+module.exports.getInterface = getInterface;
 
