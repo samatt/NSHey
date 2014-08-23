@@ -22,7 +22,7 @@ var hop = function(){
 
   //console.log('switching to  channel ' + channels[i]);
 
-  channelHopper = spawn('airport', ['sniff', channels[i]]);
+  channelHopper = spawn('/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport', ['sniff', channels[i]]);
 
   channelHopper.stdout.on('data', function (data) {
     console.log('airport stdout: ' + data);
@@ -54,7 +54,7 @@ var sniff = function(interfaceName) {
     process.stdout.cursorTo(0);
     i = (i + 1) % 4;
     var dots = new Array(i + 1).join(".");
-    process.stdout.write("Sniffing" + dots);  // write text
+    process.stdout.write("Sniffing" + dots);
   }, 300);
 
   var child = spawn(require('path').join(__dirname, 'tinsSniffer'), [interfaceName]);
