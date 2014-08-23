@@ -36,14 +36,26 @@ var hop = function(){
 };
 
 var sniff = function(interfaceName) {
-  console.log(" _____       _  __  __ _                     ");
-  console.log("/  ___|     (_)/ _|/ _(_)                    ");
-  console.log("\\ `--. _ __  _| |_| |_ _ _ __   __ _        ");
-  console.log(" `--. \\ '_ \\| |  _|  _| | '_ \\ / _` |     ");
-  console.log("/\\__/ / | | | | | | | | | | | | (_| |_ _ _  ");
-  console.log("\\____/|_| |_|_|_| |_| |_|_| |_|\\__, (_|_|_)");
-  console.log("                                __/ |        ");
-  console.log("                               |___/         ");
+  console.log(
+    "\n" +
+    "███╗   ██╗███████╗██╗  ██╗███████╗██╗   ██╗██╗   ██╗██╗   ██╗" + "\n" +
+    "████╗  ██║██╔════╝██║  ██║██╔════╝╚██╗ ██╔╝╚██╗ ██╔╝╚██╗ ██╔╝" + "\n" +
+    "██╔██╗ ██║███████╗███████║█████╗   ╚████╔╝  ╚████╔╝  ╚████╔╝ " + "\n" +
+    "██║╚██╗██║╚════██║██╔══██║██╔══╝    ╚██╔╝    ╚██╔╝    ╚██╔╝  " + "\n" +
+    "██║ ╚████║███████║██║  ██║███████╗   ██║      ██║      ██║   " + "\n" +
+    "╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚══════╝   ╚═╝      ╚═╝      ╚═╝   " + "\n"
+  );
+
+  console.log('Saving results to ' + outputFile);
+
+  var i = 0;
+  setInterval(function() {
+    process.stdout.clearLine();
+    process.stdout.cursorTo(0);
+    i = (i + 1) % 4;
+    var dots = new Array(i + 1).join(".");
+    process.stdout.write("Sniffing" + dots);  // write text
+  }, 300);
 
   var child = spawn(require('path').join(__dirname, 'tinsSniffer'), [interfaceName]);
 
