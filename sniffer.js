@@ -5,7 +5,7 @@ var fs = require('fs');
 var network = require('network');
 
 var channels = ['1','6','11'];
-var i = 0;
+var channelIndex = 0;
 var channelHopper;
 var outputFile = 'packets.log';
 
@@ -14,15 +14,15 @@ var hop = function(){
     channelHopper.kill();
   }
 
-  if (i < (channels.length-1) ){
-    i++;
+  if (channelIndex < (channels.length-1) ){
+    channelIndex ++;
   } else{
-    i = 0;
+    channelIndex = 0;
   }
 
   //console.log('switching to  channel ' + channels[i]);
 
-  channelHopper = spawn('/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport', ['sniff', channels[i]]);
+  channelHopper = spawn('/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport', ['sniff', channels[channelIndex]]);
 
   channelHopper.stdout.on('data', function (data) {
     console.log('airport stdout: ' + data);
@@ -54,7 +54,7 @@ var sniff = function(interfaceName) {
     process.stdout.cursorTo(0);
     i = (i + 1) % 4;
     var dots = new Array(i + 1).join(".");
-    process.stdout.write("Sniffing" + dots);
+    process.stdout.write("Sniffing on channel " + channels[channelIndex] + dots);
   }, 300);
 
   var child = spawn(require('path').join(__dirname, 'tinsSniffer'), [interfaceName]);
