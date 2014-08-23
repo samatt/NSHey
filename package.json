@@ -1,5 +1,5 @@
 {
-  "name": "NSHey",
+  "name": "nshey",
   "version": "0.0.1",
   "description": "Sniff out the wireless network names nearby devices have connected to",
   "main": "sniffer.js",
