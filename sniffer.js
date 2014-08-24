@@ -32,41 +32,21 @@ var hop = function(channels) {
   setTimeout(hop, 10000, channels);
 };
 
-var sniff = function(interfaceName, outputFile) {
-  console.log(
-    "\n" +
-    "███╗   ██╗███████╗██╗  ██╗███████╗██╗   ██╗██╗   ██╗██╗   ██╗" + "\n" +
-    "████╗  ██║██╔════╝██║  ██║██╔════╝╚██╗ ██╔╝╚██╗ ██╔╝╚██╗ ██╔╝" + "\n" +
-    "██╔██╗ ██║███████╗███████║█████╗   ╚████╔╝  ╚████╔╝  ╚████╔╝ " + "\n" +
-    "██║╚██╗██║╚════██║██╔══██║██╔══╝    ╚██╔╝    ╚██╔╝    ╚██╔╝  " + "\n" +
-    "██║ ╚████║███████║██║  ██║███████╗   ██║      ██║      ██║   " + "\n" +
-    "╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚══════╝   ╚═╝      ╚═╝      ╚═╝   " + "\n"
-  );
-
-  console.log('Saving results to ' + outputFile);
-
-  var i = 0;
-  setInterval(function() {
-    process.stdout.clearLine();
-    process.stdout.cursorTo(0);
-    i = (i + 1) % 4;
-    var dots = new Array(i + 1).join(".");
-    process.stdout.write("Sniffing on channel " + currentChannel + dots);
-  }, 300);
+var sniff = function(interfaceName, callback) {
 
   var child = spawn(require('path').join(__dirname, 'tinsSniffer'), [interfaceName]);
 
   child.stdout.on('data', function (data) {
-    fs.appendFile(outputFile, data, function (err) {
-      if (err) {
-        console.log(err);
-      }
-    });
+    if (typeof callback === 'function') {
+      callback(data);
+    } else {
+      console.log(data);
+    }
   });
 
   child.stderr.on('data', function (err) {
     console.log(err.toString());
-    fs.appendFile('error.log', err.toString());
+    //fs.appendFile('error.log', err.toString());
   });
 }
 
@@ -76,7 +56,12 @@ var getInterface = function(cb) {
   });
 }
 
+var getCurrentChannel = function() {
+  return currentChannel;
+}
+
 module.exports.sniff = sniff;
 module.exports.hop = hop;
 module.exports.getInterface = getInterface;
+module.exports.getCurrentChannel = getCurrentChannel;
 

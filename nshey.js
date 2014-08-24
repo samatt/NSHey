@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+var fs = require('fs');
 var sniffer = require('./sniffer.js');
 
 var opts = require("nomnom").option('channels', {
@@ -28,7 +29,35 @@ sniffer.getInterface(function(obj) {
     }
   }
 
-  sniffer.sniff(interfaceName, opts.output);
-  sniffer.hop(opts.channels.split(','));
-});
+  sniffer.sniff(interfaceName, function(data) {
+    fs.appendFile(opts.output, data, function (err) {
+      if (err) {
+        console.log(err);
+      }
+    });
+  });
 
+  sniffer.hop(opts.channels.split(','));
+
+  //font ANSI Shadow from http://patorjk.com/software/taag/
+  console.log(
+    "\n" +
+    "███╗   ██╗   ███████╗   ██╗  ██╗███████╗██╗   ██╗██╗   ██╗██╗   ██╗" + "\n" +
+    "████╗  ██║   ██╔════╝   ██║  ██║██╔════╝╚██╗ ██╔╝╚██╗ ██╔╝╚██╗ ██╔╝" + "\n" +
+    "██╔██╗ ██║   ███████╗   ███████║█████╗   ╚████╔╝  ╚████╔╝  ╚████╔╝ " + "\n" +
+    "██║╚██╗██║   ╚════██║   ██╔══██║██╔══╝    ╚██╔╝    ╚██╔╝    ╚██╔╝  " + "\n" +
+    "██║ ╚████║██╗███████║██╗██║  ██║███████╗   ██║      ██║      ██║   " + "\n" +
+    "╚═╝  ╚═══╝╚═╝╚══════╝╚═╝╚═╝  ╚═╝╚══════╝   ╚═╝      ╚═╝      ╚═╝   " + "\n"
+  );
+
+  console.log('Saving results to ' + opts.output);
+
+  var i = 0;
+  setInterval(function() {
+    process.stdout.clearLine();
+    process.stdout.cursorTo(0);
+    i = (i + 1) % 4;
+    var dots = new Array(i + 1).join(".");
+    process.stdout.write("Sniffing on channel " + sniffer.getCurrentChannel() + dots);
+  }, 300);
+});
