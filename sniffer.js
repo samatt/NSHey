@@ -5,6 +5,8 @@ var network = require('network');
 var channelIndex = 0;
 var channelHopper;
 var currentChannel;
+var hopTimer;
+var tinsSniffer;
 
 var hop = function(channels) {
   if (channelHopper) {
@@ -29,14 +31,14 @@ var hop = function(channels) {
     console.log('airport stderr: ' + data);
   });
 
-  setTimeout(hop, 10000, channels);
+  hopTimer = setTimeout(hop, 10000, channels);
 };
 
 var sniff = function(interfaceName, callback) {
 
-  var child = spawn(require('path').join(__dirname, 'tinsSniffer'), [interfaceName]);
+  tinsSniffer = spawn(require('path').join(__dirname, 'tinsSniffer'), [interfaceName]);
 
-  child.stdout.on('data', function (data) {
+  tinsSniffer.stdout.on('data', function (data) {
     if (typeof callback === 'function') {
       callback(data);
     } else {
@@ -44,11 +46,21 @@ var sniff = function(interfaceName, callback) {
     }
   });
 
-  child.stderr.on('data', function (err) {
+  tinsSniffer.stderr.on('data', function (err) {
     console.log(err.toString());
     //fs.appendFile('error.log', err.toString());
   });
 }
+
+var stop = function() {
+  try {
+    tinsSniffer.kill();
+    channelHopper.kill();
+    clearTimeout(hopTimer);
+  } catch(e) {
+    console.log('Error shutting down');
+  }
+};
 
 var getInterface = function(cb) {
   network.get_active_interface(function(err, obj) {
@@ -62,6 +74,7 @@ var getCurrentChannel = function() {
 
 module.exports.sniff = sniff;
 module.exports.hop = hop;
+module.exports.stop = stop;
 module.exports.getInterface = getInterface;
 module.exports.getCurrentChannel = getCurrentChannel;
 
