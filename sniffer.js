@@ -8,7 +8,7 @@ var currentChannel;
 var hopTimer;
 var tinsSniffer;
 
-var hop = function(channels) {
+var hop = function(channels, channelHopInterval) {
   if (channelHopper) {
     channelHopper.kill();
   }
@@ -31,7 +31,17 @@ var hop = function(channels) {
     console.log('airport stderr: ' + data);
   });
 
-  hopTimer = setTimeout(hop, 10000, channels);
+  if(channelHopInterval){
+    hopTimer = setTimeout(function(){
+      hop(channels, channelHopInterval);
+      }, channelHopInterval);
+  }
+  else{
+    hopTimer = setTimeout(function(channels){hop(channels);}, 5000, channels);
+  }
+
+
+
 };
 
 var sniff = function(interfaceName, callback) {
@@ -50,7 +60,7 @@ var sniff = function(interfaceName, callback) {
     console.log(err.toString());
     //fs.appendFile('error.log', err.toString());
   });
-}
+};
 
 var stop = function() {
   try {
@@ -66,15 +76,26 @@ var getInterface = function(cb) {
   network.get_active_interface(function(err, obj) {
     cb(obj);
   });
-}
+};
+
+var getInterfaceList = function(cb) {
+  network.get_interfaces_list(function(err, list) {
+    if (err) return cb(err);
+    var names = [];
+    for(var i=0; i < list.length ; i++){
+      names.push(list[i].name);
+    }
+    cb(names);
+  });
+};
 
 var getCurrentChannel = function() {
   return currentChannel;
-}
+};
 
 module.exports.sniff = sniff;
 module.exports.hop = hop;
 module.exports.stop = stop;
 module.exports.getInterface = getInterface;
+module.exports.getInterfaceList = getInterfaceList;
 module.exports.getCurrentChannel = getCurrentChannel;
-
