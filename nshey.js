@@ -14,6 +14,11 @@ var opts = require("nomnom").option('channels', {
 }).option('interface', {
   abbr: 'i',
   help: 'Interface (leave blank to autodetect)'
+}).
+option('channelHopInterval', {
+  abbr: 'r',
+  default: '5000',
+  help: 'How often to hop between channels'
 }).parse();
 
 sniffer.getInterface(function(obj) {
@@ -37,12 +42,13 @@ sniffer.getInterface(function(obj) {
     });
   });
 
-  sniffer.hop(opts.channels.split(','));
+  sniffer.hop(opts.channels.split(','),opts.channelHopInterval);
+
 
   //font ANSI Shadow from http://patorjk.com/software/taag/
   console.log(
     "\n" +
-    "███╗   ██╗   ███████╗   ██╗  ██╗███████╗██╗   ██╗██╗   ██╗██╗   ██╗" + "\n" +
+    "███╗   ██╗   ███████╗   ██╗  ██╗███████╗██╗  ██╗██╗   ██╗██╗   ██╗" + "\n" +
     "████╗  ██║   ██╔════╝   ██║  ██║██╔════╝╚██╗ ██╔╝╚██╗ ██╔╝╚██╗ ██╔╝" + "\n" +
     "██╔██╗ ██║   ███████╗   ███████║█████╗   ╚████╔╝  ╚████╔╝  ╚████╔╝ " + "\n" +
     "██║╚██╗██║   ╚════██║   ██╔══██║██╔══╝    ╚██╔╝    ╚██╔╝    ╚██╔╝  " + "\n" +
@@ -51,6 +57,11 @@ sniffer.getInterface(function(obj) {
   );
 
   console.log('Saving results to ' + opts.output);
+
+  console.log("Available Interfaces : ");
+  sniffer.getInterfaceList(function(interfaces){
+    console.log(interfaces);
+  });
 
   var i = 0;
   setInterval(function() {
