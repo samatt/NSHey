@@ -66,7 +66,11 @@ var stop = function() {
   try {
     tinsSniffer.kill();
     channelHopper.kill();
+
     clearTimeout(hopTimer);
+    //For safety
+    spawn('killall', ['tinsSniffer']);
+    spawn('killall', ['airport']);
   } catch(e) {
     console.log('Error shutting down');
   }
