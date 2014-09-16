@@ -120,8 +120,7 @@ var stop = function() {
     spawn('killall', ['airport']);
     console.log(currentInterface);
     spawn('networksetup',['-setairportpower',currentInterface,'off']);
-    setTimeout(function(){spawn('networksetup',['-setairportpower',currentInterface,'on']);},500);
-
+    spawn('networksetup',['-setairportpower',currentInterface,'on']);
   } catch(e) {
     console.log('Error shutting down');
   }
