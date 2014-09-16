@@ -28,6 +28,9 @@ var hop = function(channels, channelHopInterval) {
   });
 
   channelHopper.stderr.on('data', function (data) {
+    if(data){
+      tinsSniffer.kill();
+    }
     console.log('airport stderr: ' + data);
   });
 
@@ -39,15 +42,12 @@ var hop = function(channels, channelHopInterval) {
   else{
     hopTimer = setTimeout(function(channels){hop(channels);}, 5000, channels);
   }
-
-
-
 };
 
 var sniff = function(interfaceName, callback) {
 
   tinsSniffer = spawn(require('path').join(__dirname, 'tinsSniffer'), [interfaceName]);
-
+  console.log(interfaceName);
   tinsSniffer.stdout.on('data', function (data) {
     if (typeof callback === 'function') {
       callback(data);
@@ -57,8 +57,10 @@ var sniff = function(interfaceName, callback) {
   });
 
   tinsSniffer.stderr.on('data', function (err) {
+    if(err){
+      channelHopper.kill();
+    }
     console.log(err.toString());
-    //fs.appendFile('error.log', err.toString());
   });
 };
 
@@ -82,12 +84,15 @@ var getInterface = function(cb) {
   });
 };
 
-var getInterfaceList = function(cb) {
+var getWiFiInterfaces = function(cb) {
   network.get_interfaces_list(function(err, list) {
     if (err) return cb(err);
     var names = [];
+
     for(var i=0; i < list.length ; i++){
-      names.push(list[i].name);
+      if(list[i].desc === "Wi-Fi"){
+        names.push(list[i].name);
+      }
     }
     cb(names);
   });
@@ -101,5 +106,5 @@ module.exports.sniff = sniff;
 module.exports.hop = hop;
 module.exports.stop = stop;
 module.exports.getInterface = getInterface;
-module.exports.getInterfaceList = getInterfaceList;
+module.exports.getWiFiInterfaces = getWiFiInterfaces;
 module.exports.getCurrentChannel = getCurrentChannel;
