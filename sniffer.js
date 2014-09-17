@@ -50,13 +50,10 @@ var hop = function(channels, channelHopInterval) {
 
 var clearProcesses = function(cb){
   var killall =spawn('killall', ['tinsSniffer']);
-  
-  killall.on('exit',function(){ 
-    console.log("KILLED AIRPORT");
-    
+
+  killall.on('exit',function(){
     var killagain = spawn('killall', ['airport']);
-    killagain.on('exit',function(){ 
-      console.log("KILLED AIRPORT");
+    killagain.on('exit',function(){
       if(typeof cb === "function"){
         cb();
       }
@@ -77,27 +74,27 @@ var start = function(options){
     }
     else{
       //Setting a default value
-      options.interface = 'en0'; 
+      options.interface = 'en0';
       getWiFiInterfaces(function(obj) {
         if (obj) {
           options.interface = obj[0];
-        } 
+        }
       });
     }
     currentInterface = options.interface;
     console.log("Sniffing on : " +options.interface);
-    
+
     sniff(options.interface, function(data) {
       if(options.filename){
         fs.appendFile(options.filename, data, function (err) {
           if (err) {
             console.log(err);
           }
-        });        
+        });
       }
 
       if(options.cb){
-        options.cb(data);  
+        options.cb(data);
       }
     });
 
@@ -133,16 +130,10 @@ var stop = function() {
 
     clearTimeout(hopTimer);
     //For safety
-<<<<<<< HEAD
     clearProcesses();
-    console.log(currentInterface);
-=======
-    spawn('killall', ['tinsSniffer']);
-    spawn('killall', ['airport']);
->>>>>>> 2e938172b892bbfb543d9b94af20e3e7d6ec5ccc
     var wifiOff = spawn('networksetup',['-setairportpower',currentInterface,'off']);
     wifiOff.on('exit',function(){
-      console.log(" Turning Wi-Fi Off");
+      console.log("Turning Wi-Fi Off");
       var wifiOn = spawn('networksetup',['-setairportpower',currentInterface,'on']);
       wifiOn.on('exit',function(){console.log("Turned WiFi On")});
     })
