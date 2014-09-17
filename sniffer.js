@@ -49,39 +49,39 @@ var hop = function(channels, channelHopInterval) {
 };
 
 var start = function(options){
-  
+
   options = options || {};
   options.filename = options.hasOwnProperty('filename') ? options.filename : null;
   options.channels = options.hasOwnProperty('channels') ? options.channels : [1,6,11];
   options.interval = options.hasOwnProperty('interval') ? options.interval : 5000;
   options.cb = (typeof options.cb === "function")?options.cb : null;
-  
+
   if(options.hasOwnProperty('interface')){
     options.interface = options.interface;
   }
   else{
     //Setting a default value
-    options.interface = 'en0'; 
+    options.interface = 'en0';
     getWiFiInterfaces(function(obj) {
       if (obj) {
         options.interface = obj[0];
-      } 
+      }
     });
   }
   currentInterface = options.interface;
   console.log("Sniffing on : " +options.interface);
-  
+
   sniff(options.interface, function(data) {
     if(options.filename){
       fs.appendFile(options.filename, data, function (err) {
           if (err) {
             console.log(err);
           }
-      });        
+      });
     }
 
     if(options.cb){
-      options.cb(data);  
+      options.cb(data);
     }
   });
 
@@ -91,7 +91,6 @@ var start = function(options){
 var sniff = function(interfaceName, callback) {
 
   tinsSniffer = spawn(require('path').join(__dirname, 'tinsSniffer'), [interfaceName]);
-  console.log(interfaceName)
   tinsSniffer.stdout.on('data', function (data) {
     if (typeof callback === 'function') {
       callback(data);
@@ -118,14 +117,13 @@ var stop = function() {
     //For safety
     spawn('killall', ['tinsSniffer']);
     spawn('killall', ['airport']);
-    console.log(currentInterface);
     var wifiOff = spawn('networksetup',['-setairportpower',currentInterface,'off']);
-    wifiOff.on('exit',function(){ 
+    wifiOff.on('exit',function(){
       console.log(" Turning Wi-Fi Off");
       var wifiOn = spawn('networksetup',['-setairportpower',currentInterface,'on']);
       wifiOn.on('exit',function(){console.log("Turned WiFi On")});
     })
-    
+
   } catch(e) {
     console.log('Error shutting down');
   }
@@ -141,10 +139,10 @@ var getWiFiInterfaces = function(cb) {
   network.get_interfaces_list(function(err, list) {
     if (err) return cb(err);
     var names = [];
-    
+
     for(var i=0; i < list.length ; i++){
       if(list[i].desc === "Wi-Fi"){
-        names.push(list[i].name);  
+        names.push(list[i].name);
       }
     }
     cb(names);
