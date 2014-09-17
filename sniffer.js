@@ -48,45 +48,63 @@ var hop = function(channels, channelHopInterval) {
 
 };
 
-var start = function(options){
+var clearProcesses = function(cb){
+  var killall =spawn('killall', ['tinsSniffer']);
   
-  options = options || {};
-  options.filename = options.hasOwnProperty('filename') ? options.filename : null;
-  options.channels = options.hasOwnProperty('channels') ? options.channels : [1,6,11];
-  options.interval = options.hasOwnProperty('interval') ? options.interval : 5000;
-  options.cb = (typeof options.cb === "function")?options.cb : null;
-  
-  if(options.hasOwnProperty('interface')){
-    options.interface = options.interface;
-  }
-  else{
-    //Setting a default value
-    options.interface = 'en0'; 
-    getWiFiInterfaces(function(obj) {
-      if (obj) {
-        options.interface = obj[0];
-      } 
+  killall.on('exit',function(){ 
+    console.log("KILLED AIRPORT");
+    
+    var killagain = spawn('killall', ['airport']);
+    killagain.on('exit',function(){ 
+      console.log("KILLED AIRPORT");
+      if(typeof cb === "function"){
+        cb();
+      }
     });
-  }
-  currentInterface = options.interface;
-  console.log("Sniffing on : " +options.interface);
-  
-  sniff(options.interface, function(data) {
-    if(options.filename){
-      fs.appendFile(options.filename, data, function (err) {
+  });
+}
+
+var start = function(options){
+  clearProcesses(function(){
+    options = options || {};
+    options.filename = options.hasOwnProperty('filename') ? options.filename : null;
+    options.channels = options.hasOwnProperty('channels') ? options.channels : [1,6,11];
+    options.interval = options.hasOwnProperty('interval') ? options.interval : 5000;
+    options.cb = (typeof options.cb === "function")?options.cb : null;
+
+    if(options.hasOwnProperty('interface')){
+      options.interface = options.interface;
+    }
+    else{
+      //Setting a default value
+      options.interface = 'en0'; 
+      getWiFiInterfaces(function(obj) {
+        if (obj) {
+          options.interface = obj[0];
+        } 
+      });
+    }
+    currentInterface = options.interface;
+    console.log("Sniffing on : " +options.interface);
+    
+    sniff(options.interface, function(data) {
+      if(options.filename){
+        fs.appendFile(options.filename, data, function (err) {
           if (err) {
             console.log(err);
           }
-      });        
-    }
+        });        
+      }
 
-    if(options.cb){
-      options.cb(data);  
-    }
+      if(options.cb){
+        options.cb(data);  
+      }
+    });
+
+    hop(options.channels,options.interval);
+
   });
-
-  hop(options.channels,options.interval);
-}
+};
 
 var sniff = function(interfaceName, callback) {
 
@@ -116,8 +134,7 @@ var stop = function() {
 
     clearTimeout(hopTimer);
     //For safety
-    spawn('killall', ['tinsSniffer']);
-    spawn('killall', ['airport']);
+    clearProcesses();
     console.log(currentInterface);
     var wifiOff = spawn('networksetup',['-setairportpower',currentInterface,'off']);
     wifiOff.on('exit',function(){ 
