@@ -109,7 +109,6 @@ var start = function(options){
 var sniff = function(interfaceName, callback) {
 
   tinsSniffer = spawn(require('path').join(__dirname, 'tinsSniffer'), [interfaceName]);
-  console.log(interfaceName)
   tinsSniffer.stdout.on('data', function (data) {
     if (typeof callback === 'function') {
       callback(data);
@@ -134,15 +133,20 @@ var stop = function() {
 
     clearTimeout(hopTimer);
     //For safety
+<<<<<<< HEAD
     clearProcesses();
     console.log(currentInterface);
+=======
+    spawn('killall', ['tinsSniffer']);
+    spawn('killall', ['airport']);
+>>>>>>> 2e938172b892bbfb543d9b94af20e3e7d6ec5ccc
     var wifiOff = spawn('networksetup',['-setairportpower',currentInterface,'off']);
-    wifiOff.on('exit',function(){ 
+    wifiOff.on('exit',function(){
       console.log(" Turning Wi-Fi Off");
       var wifiOn = spawn('networksetup',['-setairportpower',currentInterface,'on']);
       wifiOn.on('exit',function(){console.log("Turned WiFi On")});
     })
-    
+
   } catch(e) {
     console.log('Error shutting down');
   }
@@ -158,10 +162,10 @@ var getWiFiInterfaces = function(cb) {
   network.get_interfaces_list(function(err, list) {
     if (err) return cb(err);
     var names = [];
-    
+
     for(var i=0; i < list.length ; i++){
       if(list[i].desc === "Wi-Fi"){
-        names.push(list[i].name);  
+        names.push(list[i].name);
       }
     }
     cb(names);
