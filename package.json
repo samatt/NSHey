@@ -1,6 +1,6 @@
 {
   "name": "nshey",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Sniff out the wireless network names nearby devices have connected to",
   "main": "sniffer.js",
   "dependencies": {
