@@ -119,9 +119,13 @@ var stop = function() {
     spawn('killall', ['tinsSniffer']);
     spawn('killall', ['airport']);
     console.log(currentInterface);
-    spawn('networksetup',['-setairportpower',currentInterface,'off']);
-    setTimeout(function(){spawn('networksetup',['-setairportpower',currentInterface,'on']);},500);
-
+    var wifiOff = spawn('networksetup',['-setairportpower',currentInterface,'off']);
+    wifiOff.on('exit',function(){ 
+      console.log(" Turning Wi-Fi Off");
+      var wifiOn = spawn('networksetup',['-setairportpower',currentInterface,'on']);
+      wifiOn.on('exit',function(){console.log("Turned WiFi On")});
+    })
+    
   } catch(e) {
     console.log('Error shutting down');
   }
