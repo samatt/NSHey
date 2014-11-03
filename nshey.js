@@ -32,6 +32,10 @@ console.log(
   "██║ ╚████║██╗███████║██╗██║  ██║███████╗   ██║      ██║      ██║   " + "\n" +
   "╚═╝  ╚═══╝╚═╝╚══════╝╚═╝╚═╝  ╚═╝╚══════╝   ╚═╝      ╚═╝      ╚═╝   " + "\n"
 );
+console.log(" ");
+console.log("To run NSHeyyy you need to change permissions to /dev/bpf*");
+console.log("Run the following command in terminal : sudo chmod o+r /dev/bpf*");
+console.log(" ");
 
 opts.channels = opts.channels.split(',');
 sniffer.start(opts);
